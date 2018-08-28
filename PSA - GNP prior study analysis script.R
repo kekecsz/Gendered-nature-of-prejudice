@@ -48,3 +48,15 @@ summary(mod)
 cor_results = cocor(~AW_B + AWM_BM | AW_B + AWF_BF, alternative = "greater", data = dataset)
 # results
 cor_results
+
+
+# the same analysis with paired.r from the psych package
+dataset_nomising = as.data.frame(na.omit(cbind(dataset$AW_B, dataset$AWM_BM, dataset$AWF_BF)))
+names(dataset_nomising) = c("AW_B", "AWM_BM", "AWF_BF")
+
+AW_B_AWM_BM = cor(dataset_nomising$AW_B, dataset_nomising$AWM_BM)
+AW_B_AWF_BF= cor(dataset_nomising$AW_B, dataset_nomising$AWF_BF)
+AWM_BM_AWF_BF= cor(dataset_nomising$AWM_BM, dataset_nomising$AWF_BF)
+
+
+paired.r(AW_B_AWM_BM, AW_B_AWF_BF, AWM_BM_AWF_BF, n = nrow(dataset_nomising), twotailed = F)
