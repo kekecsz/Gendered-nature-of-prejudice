@@ -1,0 +1,180 @@
+---
+title: "Data Reanalysis Notebook"
+output: 
+  html_notebook:
+    theme: paper
+    toc: yes
+    toc_float: yes
+---
+
+# Load Packages {.tabset}
+
+## Haven
+```{r}
+# This package teaches R how to import SPSS files
+if (!require(haven)){
+  install.packages("haven", dependencies = TRUE)
+  require(haven)
+}
+```
+
+## Tidyverse
+```{r}
+# This package has a million useful functions for tidying, cleaning, and reshaping data
+if (!require(tidyverse)){
+  install.packages("tidyverse", dependencies = TRUE)
+  require(tidyverse)
+}
+```
+
+## Psych
+```{r}
+# This  package has useful functions for psychologists like correlation and creating composite variables
+if (!require(psych)){
+  install.packages("psych", dependencies = TRUE)
+  require(psych)
+}
+```
+# Import Data {.tabset}
+
+## 2015 UK data
+```{r}
+UKdataset <- read_sav("2015 UK Undergraduates.sav")
+```
+## 2017 Florida Registered Voters
+```{r}
+FLdataset <- read_sav("2017 Registered Florida Voters.sav")
+```
+## 2018 US mTurk workers
+```{r}
+# Load the data
+MTURKdataset <- read_sav("2018 mTurk Workers.sav")
+```
+```{r}
+# Recode the gender variable
+MTURKdataset$gender <- case_when(str_sub(MTURKdataset$Q107, 1, 1) == "f" | str_sub(MTURKdataset$Q107, 1, 1) == "F" ~ "female",
+                                 str_sub(MTURKdataset$Q107, 1, 1) == "m" | str_sub(MTURKdataset$Q107, 1, 1) == "M" ~ "male",
+                                 TRUE ~ as.character(MTURKdataset$Q107))
+
+# Recode the race variable
+MTURKdataset$race <- case_when(str_sub(MTURKdataset$Q109.2, 1, 1) == "w" | str_sub(MTURKdataset$Q109.2, 1, 1) == "W" | str_sub(MTURKdataset$Q109.2, 1, 1) == "c" | str_sub(MTURKdataset$Q109.2, 1, 1) == "C" ~ "White",
+                                 TRUE ~ as.character(MTURKdataset$Q109.2))
+```
+
+# Correlation Tables {.tabset}
+
+## 2015 UK data {.tabset}
+
+### White participants
+```{r}
+(UKdataset %>%
+  filter (WhiteOnlyFilter == 1) %>%
+  select (AW_B, AWM_BM, AWF_BF) %>%  
+  corr.test(y = NULL, use = "pairwise", method="pearson", adjust="holm", alpha=.05, ci=TRUE) -> UKWhiteCorrs)
+```
+### White male participants
+```{r}
+(UKdataset %>%
+  filter (WhiteOnlyFilter == 1,
+          PGender == "male") %>%
+  select (AW_B, AWM_BM, AWF_BF) %>%  
+  corr.test(y = NULL, use = "pairwise", method="pearson", adjust="holm", alpha=.05, ci=TRUE) -> UKWHITEMaleCorrs)
+```
+### White female participants
+```{r}
+(UKdataset %>%
+  filter (WhiteOnlyFilter == 1,
+          PGender == "female") %>%
+  select (AW_B, AWM_BM, AWF_BF) %>%  
+  corr.test(y = NULL, use = "pairwise", method="pearson", adjust="holm", alpha=.05, ci=TRUE) -> UKWhiteFemaleCorrs)
+```
+## 2017 Florida Registered Voters {.tabset}
+### White participants
+```{r}
+(FLdataset %>%
+  filter (racew == 1) %>%
+  select (AttitudeWhiteminusBlack, AttitudeWMminusBM, AttitudeWFminusBF) %>%  
+  corr.test(y = NULL, use = "pairwise", method="pearson", adjust="holm", alpha=.05, ci=TRUE) -> FLWhiteCorrs)
+```
+### White male participants
+```{r}
+(FLdataset %>%
+  filter (racew == 1,
+          sex2 == 1) %>%
+  select (AttitudeWhiteminusBlack, AttitudeWMminusBM, AttitudeWFminusBF) %>%  
+  corr.test(y = NULL, use = "pairwise", method="pearson", adjust="holm", alpha=.05, ci=TRUE) -> FLWhiteMaleCorrs)
+```
+### White female participants
+```{r}
+(FLdataset %>%
+  filter (racew == 1,
+          sex2 == 2) %>%
+  select (AttitudeWhiteminusBlack, AttitudeWMminusBM, AttitudeWFminusBF) %>%  
+  corr.test(y = NULL, use = "pairwise", method="pearson", adjust="holm", alpha=.05, ci=TRUE) -> FLFemaleCorrs)
+```
+## 2018 US mTurk workers {.tabset}
+### White participants
+```{r}
+(MTURKdataset %>%
+  filter (race == "White") %>%
+  select (Predjudice_White_Black, Predjudice_WhiteMen_BlackMen, Predjudice_WhiteWomen_BlackWomen) %>%  
+  corr.test(y = NULL, use = "pairwise", method="pearson", adjust="holm", alpha=.05, ci=TRUE) -> MTURKWhiteCorrs)
+```
+### White male participants
+```{r}
+(MTURKdataset %>%
+  filter (race == "White",
+          gender == "male") %>%
+  select (Predjudice_White_Black, Predjudice_WhiteMen_BlackMen, Predjudice_WhiteWomen_BlackWomen) %>%  
+  corr.test(y = NULL, use = "pairwise", method="pearson", adjust="holm", alpha=.05, ci=TRUE) -> MTURKWhiteMaleCorrs)
+```
+### White female participants
+```{r}
+(MTURKdataset %>%
+  filter (race == "White",
+          gender == "female") %>%
+  select (Predjudice_White_Black, Predjudice_WhiteMen_BlackMen, Predjudice_WhiteWomen_BlackWomen) %>%  
+  corr.test(y = NULL, use = "pairwise", method="pearson", adjust="holm", alpha=.05, ci=TRUE) -> MTURKWhiteFemaleCorrs)
+```
+# Test of correlation differences {.tabset}
+## 2015 UK data {.tabset}
+### White participants
+```{r}
+paired.r(xy = UKWhiteCorrs$r[1,2], xz = UKWhiteCorrs$r[1,3], yz = UKWhiteCorrs$r[2,3], n = 77, n2=NULL,twotailed=TRUE)
+```
+### White male participants
+```{r}
+paired.r(xy = UKWHITEMaleCorrs$r[1,2], xz = UKWHITEMaleCorrs$r[1,3], yz = UKWHITEMaleCorrs$r[2,3], n = 10, n2=NULL,twotailed=TRUE)
+```
+### White female participants
+```{r}
+paired.r(xy = UKWhiteFemaleCorrs$r[1,2], xz = UKWhiteFemaleCorrs$r[1,3], yz = UKWhiteFemaleCorrs$r[2,3], n = 67, n2=NULL,twotailed=TRUE)
+```
+## 2017 Registered Florida Voters {.tabset}
+### White participants
+```{r}
+paired.r(xy = FLWhiteCorrs$r[1,2], xz = FLWhiteCorrs$r[1,3], yz = FLWhiteCorrs$r[2,3], n = 180, n2=NULL,twotailed=TRUE)
+```
+### White male participants
+```{r}
+paired.r(xy = FLWhiteMaleCorrs$r[1,2], xz = FLWhiteMaleCorrs$r[1,3], yz = FLWhiteMaleCorrs$r[2,3], n = 92, n2=NULL,twotailed=TRUE)
+```
+### White female participants
+```{r}
+paired.r(xy = FLFemaleCorrs$r[1,2], xz = FLFemaleCorrs$r[1,3], yz = FLFemaleCorrs$r[2,3], n = 88, n2=NULL,twotailed=TRUE)
+```
+## 2018 US mTurk Workers {.tabset}
+### White participants
+```{r}
+paired.r(xy = MTURKWhiteCorrs$r[1,2], xz = MTURKWhiteCorrs$r[1,3], yz = MTURKWhiteCorrs$r[2,3], n = 138, n2=139,twotailed=TRUE)
+```
+### White male participants
+```{r}
+paired.r(xy = MTURKWhiteMaleCorrs$r[1,2], xz = MTURKWhiteMaleCorrs$r[1,3], yz = MTURKWhiteMaleCorrs$r[2,3], n = 54, n2=55,twotailed=TRUE)
+```
+### White female participants
+```{r}
+paired.r(xy = MTURKWhiteFemaleCorrs$r[1,2], xz = MTURKWhiteFemaleCorrs$r[1,3], yz = MTURKWhiteFemaleCorrs$r[2,3], n = 83, n2=84,twotailed=TRUE)
+```
+
+
