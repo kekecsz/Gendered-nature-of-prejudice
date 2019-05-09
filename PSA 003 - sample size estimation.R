@@ -65,6 +65,121 @@ simulation_function = function(total_N, true_effect,
 iterations = 1000
 
 
+
+########### Testing only hypothesis 1
+
+simulation_output = replicate(iterations, 
+                              simulation_function(
+                                total_N = 1800,
+                                true_effect = c(# we can specify the true effect to be simulated here (in r difference) for each hypnothesis. This is expressed in difference in the correlation of the prejudice against the group in general and the males of the group, and the correlation of the prejudice against the group in general and the females of the group
+                                  0.1, # Black prejudice correlation difference among non-(black women)
+                                  #   0, # Black prejudice correlation difference among black women
+                                  0.1, # White prejudice correlation difference among non-(white women)
+                                  #  0, # White prejudice correlation difference among white women
+                                  0.1, # EastAsian prejudice correlation difference among non-(east asian women)
+                                  # 0, # EastAsian prejudice correlation difference among east asian women
+                                  0.1, # Politician prejudice correlation difference among everyone
+                                  0.1, # Criminal prejudice correlation difference among everyone
+                                  0.1), # Police prejudice correlation difference among everyone
+                                # in the example data the effect sizes were: 0.55, 0, 0.45, 0, 0.1, 0, 0.3, 0.3, 0.5 respectively.
+                                baseline_corr_matrix = t(matrix(c(1, 0.6, 0.6, # this is the correlation matrix that we will simulate if there is no correlation difference. The order of the variables in this matrix is: prejudice against the group in general, prejudice against the males of the group, prejudice against the females of the group 
+                                                                  0.6, 1, 0.4,
+                                                                  0.6, 0.4, 1), nrow = 3)),
+                                proportion_of_total_N = c( # proportion of participants within the total participant pool who will be eligible for this hypothesis test (to specify how many people will be present in the subrougps on which we do the analysis)
+                                  1, # non-(black women)
+                                  #    0.1, # black women
+                                  1, # non-(white women)
+                                  #   0.1, # white women
+                                  1, # non-(east asian women)
+                                  #  0.1, # east asian women
+                                  1, # everyone
+                                  1, # everyone
+                                  1), # everyone
+                                sides_of_test = "one.sided",       # you can specify "one.sided" or "two.sided" here
+                                minimal_effect_of_interest = 0.1, # expressed in r difference, just like the true effect above
+                                CI_width = 0.9985 # width of the confidence interval for statistical inference. This is effectively the inverse of the p-value threshold for rejecting the null or the alternative hypothesis
+                              ))
+
+
+# power and inferential error rates
+table(simulation_output)/sum(table(simulation_output))
+
+
+## Scenario 2. simulating no effect across the board
+simulation_output = replicate(iterations, 
+                              simulation_function(
+                                total_N = 2000,
+                                true_effect = c(# we can specify the true effect to be simulated here (in r difference) for each hypnothesis. This is expressed in difference in the correlation of the prejudice against the group in general and the males of the group, and the correlation of the prejudice against the group in general and the females of the group
+                                  0, # Black prejudice correlation difference among non-(black women)
+                                  #      0, # Black prejudice correlation difference among black women
+                                  0, # White prejudice correlation difference among non-(white women)
+                                  #     0, # White prejudice correlation difference among white women
+                                  0, # EastAsian prejudice correlation difference among non-(east asian women)
+                                  #    0, # EastAsian prejudice correlation difference among east asian women
+                                  0, # Politician prejudice correlation difference among everyone
+                                  0, # Criminal prejudice correlation difference among everyone
+                                  0), # Police prejudice correlation difference among everyone
+                                # in the example data the effect sizes were: 0.55, 0, 0.45, 0, 0.1, 0, 0.3, 0.3, 0.5 respectively.
+                                baseline_corr_matrix = t(matrix(c(1, 0.6, 0.6, # this is the correlation matrix that we will simulate if there is no correlation difference. The order of the variables in this matrix is: prejudice against the group in general, prejudice against the males of the group, prejudice against the females of the group 
+                                                                  0.6, 1, 0.4,
+                                                                  0.6, 0.4, 1), nrow = 3)),
+                                proportion_of_total_N = c( # proportion of participants within the total participant pool who will be eligible for this hypothesis test (to specify how many people will be present in the subrougps on which we do the analysis)
+                                  1, # non-(black women)
+                                  #       0.1, # black women
+                                  1, # non-(white women)
+                                  #      0.1, # white women
+                                  1, # non-(east asian women)
+                                  #     0.1, # east asian women
+                                  1, # everyone
+                                  1, # everyone
+                                  1), # everyone
+                                sides_of_test = "one.sided",       # you can specify "one.sided" or "two.sided" here
+                                minimal_effect_of_interest = 0.1, # expressed in r difference, just like the true effect above
+                                CI_width = 0.9985 # width of the confidence interval for statistical inference. This is effectively the inverse of the p-value threshold for rejecting the null or the alternative hypothesis
+                              ))
+
+# power and inferential error rates
+table(simulation_output)/sum(table(simulation_output))
+
+
+## Scenario 3. simulating correlation difference in all subgroups and prejudice types
+simulation_output = replicate(iterations, 
+                              simulation_function(
+                                total_N = 1800,
+                                true_effect = c(# we can specify the true effect to be simulated here (in r difference) for each hypnothesis. This is expressed in difference in the correlation of the prejudice against the group in general and the males of the group, and the correlation of the prejudice against the group in general and the females of the group
+                                  0.1, # Black prejudice correlation difference among non-(black women)
+                                  #        0.1, # Black prejudice correlation difference among black women
+                                  0.1, # White prejudice correlation difference among non-(white women)
+                                  #       0.1, # White prejudice correlation difference among white women
+                                  0.1, # EastAsian prejudice correlation difference among non-(east asian women)
+                                  #      0.1, # EastAsian prejudice correlation difference among east asian women
+                                  0.1, # Politician prejudice correlation difference among everyone
+                                  0.1, # Criminal prejudice correlation difference among everyone
+                                  0.1), # Police prejudice correlation difference among everyone
+                                # in the example data the effect sizes were: 0.55, 0, 0.45, 0, 0.1, 0, 0.3, 0.3, 0.5 respectively.
+                                baseline_corr_matrix = t(matrix(c(1, 0.6, 0.6, # this is the correlation matrix that we will simulate if there is no correlation difference. The order of the variables in this matrix is: prejudice against the group in general, prejudice against the males of the group, prejudice against the females of the group 
+                                                                  0.6, 1, 0.4,
+                                                                  0.6, 0.4, 1), nrow = 3)),
+                                proportion_of_total_N = c( # proportion of participants within the total participant pool who will be eligible for this hypothesis test (to specify how many people will be present in the subrougps on which we do the analysis)
+                                  1, # non-(black women)
+                                  #        0.1, # black women
+                                  1, # non-(white women)
+                                  #       0.1, # white women
+                                  1, # non-(east asian women)
+                                  #      0.1, # east asian women
+                                  1, # everyone
+                                  1, # everyone
+                                  1), # everyone
+                                sides_of_test = "one.sided",       # you can specify "one.sided" or "two.sided" here
+                                minimal_effect_of_interest = 0.1, # expressed in r difference, just like the true effect above
+                                CI_width = 0.9985 # width of the confidence interval for statistical inference. This is effectively the inverse of the p-value threshold for rejecting the null or the alternative hypothesis
+                              ))
+
+# power and inferential error rates
+table(simulation_output)/sum(table(simulation_output))
+
+########### Testing both hypothesis 1 and 2
+
 ## Scenario 1. simulating the originally expected pattern of effects
 
 simulation_output = replicate(iterations, 
